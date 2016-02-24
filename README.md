@@ -116,11 +116,12 @@ class FinderCommand(ApplicationCommand, DeclarativeSettingsMixin):
     def process_setting_entry(self, entry):
         processed_key = self.name + '.' + entry[1]
         super(DeclarativeSettingsMixin, self).process_setting_entry(
-        	(entr[0], processed_key, entry[2])
+        	(entry[0], processed_key, entry[2])
         )
         return processed_key
 
 class WordFinder(FinderCommand, DeclarativeSettingsMixin):
+    name = 'word_finder'
     settings_entries = (
         ('enabled', 'enable_wordfinder', True),
         FinderCommand.settings_entries
@@ -130,7 +131,19 @@ class WordFinder(FinderCommand, DeclarativeSettingsMixin):
         self.load_settings('wordfinder.sublime-settings')
 ```
 
+The above code will load the 'word_finder.enabled' and the
+'word_finder.remember_last_word' settings, and attach them to the
+'enabled' and 'remember' object attributes.
+
 The `process_setting_entry` method is responsible for processing, loading,
 and binding the setting specified in the entry to the correct object
 attribute. Additionally, the method must also return the final key used to
 load the setting, so that the loader may register the correct update handlers.
+
+
+## Notes & Caveats ##
+The one big issue that must be kept in mind (at least for Sublime Text 3) is that
+the plugin API is not immediately available - this includes loading settings
+In order to work around this, the settings loader will assign the default
+values to the declared attributes when initially run, then automatically update
+them when the api becomes available.
